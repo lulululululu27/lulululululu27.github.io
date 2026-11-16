@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "点球读人辅助器",
   "short_name": "点球读人",
   "description": "记录双方点球习惯，预测下一球该踢哪边、该扑哪边。",
@@ -11,19 +11,19 @@
   "lang": "zh-CN",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-maskable-512.png",
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

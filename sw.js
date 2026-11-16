@@ -1,14 +1,14 @@
-/* 点球读人辅助器 · 离线缓存
+﻿/* 点球读人辅助器 · 离线缓存
    装到主屏幕后，即使电脑关了、断网了，也能打开。 */
-const CACHE = "pk-helper-v1";
+const CACHE = "pk-helper-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png",
+  "./apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (e) => {
