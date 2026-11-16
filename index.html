@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d121c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="点球读人">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>点球辅助器 · 读人</title>
+<style>
+  :root{
+    --bg:#0d121c; --card:#161e2c; --card2:#1b2434; --line:#28334a;
+    --txt:#e8eefc; --sub:#8b9ab5; --blue:#5aa9ff; --gold:#ffc75a; --red:#ff7a7a;
+    --green:#3ddc97;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation}
+  html,body{margin:0; padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #1a2740 0%, var(--bg) 55%) no-repeat, var(--bg);
+    color:var(--txt);
+    font-family:"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,-apple-system,sans-serif;
+    max-width:520px; margin:0 auto; padding:14px 14px 40px; line-height:1.5;
+  }
+  header{padding:6px 2px 12px}
+  h1{font-size:20px; margin:0; letter-spacing:.5px}
+  h1 span{color:var(--blue)}
+  .sub{color:var(--sub); font-size:12px; margin-top:3px}
+
+  .hero{
+    position:relative; border-radius:20px; padding:16px 18px 14px;
+    background:linear-gradient(160deg,#1d2a42 0%,#141c29 70%);
+    border:1px solid var(--line); box-shadow:0 12px 30px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-40px; top:-60px; width:180px; height:180px;
+    background:radial-gradient(circle,rgba(90,169,255,.28),transparent 70%); pointer-events:none;
+  }
+  .hero.def{background:linear-gradient(160deg,#2a2340 0%,#171425 70%)}
+  .hero.def::after{background:radial-gradient(circle,rgba(180,140,255,.28),transparent 70%)}
+  .hl{font-size:12px; color:var(--sub); letter-spacing:2px}
+  .big{display:flex; align-items:baseline; gap:10px; margin:2px 0 2px}
+  .big .side{font-size:56px; font-weight:800; line-height:1.05; letter-spacing:2px}
+  .big .pct{font-size:15px; color:var(--sub)}
+  .big .pct b{color:var(--txt); font-size:19px}
+  .sec{color:var(--sub); font-size:12.5px; margin-top:4px}
+
+  .bars{margin-top:12px; display:grid; gap:7px}
+  .bar{display:grid; grid-template-columns:22px 1fr 46px; align-items:center; gap:8px; font-size:12px}
+  .bar .name{color:var(--sub)}
+  .track{display:block; height:9px; border-radius:6px; background:#0e1523; overflow:hidden}
+  .fill{display:block; height:100%; border-radius:6px; transition:width .35s ease}
+  .bar .val{text-align:right; color:var(--sub); font-variant-numeric:tabular-nums}
+  .bar.top .val{color:var(--txt); font-weight:700}
+  .bar.top .name{color:var(--txt); font-weight:700}
+
+  .card{
+    margin-top:14px; background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:14px 14px 12px;
+  }
+  .card h2{font-size:13px; margin:0 0 10px; color:var(--sub); font-weight:600; letter-spacing:1px}
+  .row{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+  .row > .lab{width:76px; flex:0 0 76px; font-size:12.5px; color:var(--sub)}
+  .seg{display:flex; gap:6px; flex:1}
+  .seg button{
+    flex:1; padding:11px 0; font-size:14px; color:var(--txt);
+    background:var(--card2); border:1px solid var(--line); border-radius:11px;
+    font-family:inherit; cursor:pointer; transition:.15s;
+  }
+  .seg button:active{transform:scale(.97)}
+  .seg button.on{background:#2b4a74; border-color:#4d84c8; color:#fff; font-weight:700; box-shadow:0 0 0 2px rgba(90,169,255,.18) inset}
+  .seg.small button{padding:9px 0; font-size:13px}
+  .seg.res button.on{background:#24405c; border-color:#3f6d99}
+  .seg.res button.on.goal{background:#1f4d3c; border-color:#2f8f68; color:#c9ffe8}
+  .seg.res button.on.save{background:#5a3b1c; border-color:#a5711f; color:#ffe6bd}
+  .seg.res button.on.miss{background:#4a2530; border-color:#94414f; color:#ffd3da}
+  #commit{
+    width:100%; margin-top:4px; padding:14px; border-radius:13px; cursor:pointer;
+    border:0; font-size:15px; font-weight:700; font-family:inherit; color:#08131f;
+    background:linear-gradient(180deg,#6fbcff,#3f8fe0); letter-spacing:1px;
+  }
+  #commit:disabled{opacity:.35; cursor:not-allowed}
+  .ghost{
+    background:transparent; border:1px solid var(--line); color:var(--sub);
+    border-radius:10px; padding:8px 12px; font-size:12px; font-family:inherit; cursor:pointer;
+  }
+  .hist{display:grid; gap:6px}
+  .hrow{
+    display:grid; grid-template-columns:26px 1fr 1fr 26px; gap:6px; align-items:center;
+    font-size:12.5px; padding:7px 9px; background:var(--card2); border-radius:10px;
+  }
+  .hrow .idx{color:var(--sub); font-variant-numeric:tabular-nums}
+  .tag{display:inline-block; padding:1px 7px; border-radius:6px; font-size:11.5px; margin-right:4px}
+  .tag.g{background:#134033; color:#7de9be}
+  .tag.s{background:#4a3413; color:#ffd48a}
+  .tag.m{background:#46202a; color:#ff9fae}
+  .tag.d{background:#1d2a44; color:#9fc4f5}
+  .x{background:none; border:0; color:#5d6b84; font-size:16px; cursor:pointer; line-height:1}
+  .x:hover{color:var(--red)}
+  .stat{display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12.5px}
+  .stat div{background:var(--card2); border-radius:10px; padding:9px 10px; color:var(--sub)}
+  .stat b{display:block; color:var(--txt); font-size:16px; margin-top:2px; font-variant-numeric:tabular-nums}
+  .split{display:flex; gap:4px; margin-top:6px}
+  .split i{height:6px; border-radius:3px; display:block}
+  .notes{margin:0; padding-left:16px; font-size:12.5px; color:#a9b8d2}
+  .notes li{margin-bottom:5px}
+  .notes li::marker{color:var(--blue)}
+  details summary{cursor:pointer; color:var(--sub); font-size:12.5px; outline:none}
+  details[open] summary{color:var(--txt); margin-bottom:10px}
+  .set{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--sub); margin-bottom:10px}
+  input[type=range]{flex:1; accent-color:#5aa9ff}
+  .warn{font-size:11.5px; color:#7d8aa3; margin-top:8px; line-height:1.55}
+  .randomwrap{display:flex; gap:8px; margin-top:10px}
+  .randomwrap button{flex:1}
+  footer{color:#5f6d86; font-size:11.5px; text-align:center; margin-top:18px; line-height:1.7}
+
+  .modal{position:fixed; inset:0; z-index:60; background:rgba(6,10,18,.8);
+         display:flex; align-items:center; justify-content:center; padding:16px}
+  .modal[hidden]{display:none}
+  .modal-card{width:100%; max-width:440px; background:#141c29; border:1px solid var(--line);
+              border-radius:16px; padding:14px}
+  .modal-card h3{margin:0 0 10px; font-size:14px; color:var(--txt)}
+  .modal-card textarea{width:100%; height:160px; background:#0b111b; color:#cfd9ea;
+    border:1px solid var(--line); border-radius:10px; padding:10px; font-size:12px;
+    font-family:ui-monospace,Consolas,monospace; resize:vertical}
+  .modal-row{display:flex; gap:8px; margin-top:10px}
+  .modal-row button{flex:1; padding:12px 0; font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>点球<span>读人</span>辅助器</h1>
+  <div class="sub">记录你俩的习惯 → 算下一球该踢哪边 / 该扑哪边</div>
+</header>
+
+<!-- 进攻建议 -->
+<section class="hero" id="atkCard">
+  <div class="hl">下一球 · 我踢这边 <span id="atkRound"></span></div>
+  <div class="big">
+    <div class="side" id="atkSide">—</div>
+    <div class="pct">命中概率 <b id="atkPct">--</b></div>
+  </div>
+  <div class="sec" id="atkSec">先记两球，模型才有东西可算。</div>
+  <div class="bars" id="atkBars"></div>
+</section>
+
+<!-- 防守建议 -->
+<section class="hero def" id="defCard">
+  <div class="hl">我守门 · 扑这边</div>
+  <div class="big">
+    <div class="side" id="defSide">—</div>
+    <div class="pct">他踢这边的概率 <b id="defPct">--</b></div>
+  </div>
+  <div class="sec" id="defSec">按对方历史射门分布 + 序列习惯推的。</div>
+  <div class="bars" id="defBars"></div>
+</section>
+
+<!-- 记录 -->
+<section class="card">
+  <h2>记一球（上一回合）</h2>
+  <div class="row">
+    <div class="lab">我踢</div>
+    <div class="seg" id="segMy"></div>
+  </div>
+  <div class="row">
+    <div class="lab">我结果</div>
+    <div class="seg small res" id="segMyRes"></div>
+  </div>
+  <div class="row">
+    <div class="lab">对方踢</div>
+    <div class="seg" id="segOpp"></div>
+  </div>
+  <div class="row">
+    <div class="lab">对方结果</div>
+    <div class="seg small res" id="segOppRes"></div>
+  </div>
+  <div class="row">
+    <div class="lab">对方门将扑向</div>
+    <div class="seg small" id="segKeep"></div>
+  </div>
+  <button id="commit" disabled>记下这一球</button>
+  <div class="warn">「门将扑向」能选就选——它比你的进球结果信息量大得多。没看清选「没注意」。</div>
+</section>
+
+<!-- 历史 -->
+<section class="card">
+  <h2>历史记录 <span id="count" style="color:#5f6d86"></span></h2>
+  <div class="hist" id="hist"></div>
+  <div style="display:flex; gap:8px; margin-top:10px">
+    <button class="ghost" id="undo">撤销上一球</button>
+    <button class="ghost" id="clear">全部清空</button>
+    <button class="ghost" id="demo" style="margin-left:auto">填演示数据</button>
+  </div>
+</section>
+
+<!-- 统计 -->
+<section class="card">
+  <h2>数据 &amp; 自检</h2>
+  <div class="stat" id="stats"></div>
+  <div class="warn" id="backtest"></div>
+  <div style="display:flex; gap:8px; margin-top:10px">
+    <button class="ghost" id="exportBtn" style="flex:1">导出备份</button>
+    <button class="ghost" id="importBtn" style="flex:1">导入备份</button>
+  </div>
+</section>
+
+<!-- 依据 -->
+<section class="card">
+  <h2>为什么是这个方向</h2>
+  <ul class="notes" id="notes"></ul>
+</section>
+
+<!-- 设置 -->
+<section class="card">
+  <details>
+    <summary>设置 / 模式</summary>
+    <div class="set" style="margin-top:10px">
+      <span style="flex:0 0 78px">中路风险</span>
+      <input type="range" id="cp" min="0" max="25" step="1">
+      <span id="cpv" style="width:44px; text-align:right; font-variant-numeric:tabular-nums"></span>
+    </div>
+    <div class="set">
+      <span style="flex:0 0 78px">策略</span>
+      <div class="seg small" id="modeSeg" style="flex:1">
+        <button data-mode="read" class="on">读人</button>
+        <button data-mode="random">随缘</button>
+      </div>
+    </div>
+    <div class="warn">
+      读人 = 按对手习惯反着来，前提是样本 ≥ 4 球。<br>
+      随缘 = 纯随机（左/右各 45%、中 10%）。样本少或对手已经很难读时，这个反而更难被针对——<b>人最怕的不是你猜得准，是你没规律</b>。
+    </div>
+    <div class="randomwrap">
+      <button class="ghost" id="reroll">再掷一次</button>
+    </div>
+  </details>
+</section>
+
+<footer>
+  装到桌面：iPhone「分享 → 添加到主屏幕」；安卓「⋮ → 安装应用」。<br>
+  装好后断网、电脑关机也能打开。<br>
+  对人有用，对 AI 门将基本没用（AI 不吃心理学）。
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card">
+    <h3 id="modalTitle">备份</h3>
+    <textarea id="modalText" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div class="modal-row">
+      <button class="ghost" id="modalCopy">复制</button>
+      <button class="ghost" id="modalOk">完成</button>
+      <button class="ghost" id="modalClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var S = ["左","中","右"];
+var C = ["#5aa9ff","#ffc75a","#ff7a7a"];
+var PRIOR_SHOT = [0.40,0.20,0.40];
+var PRIOR_DIVE = [0.38,0.24,0.38];
+var TRANS_PRIOR = [
+  [0.34,0.16,0.50],
+  [0.42,0.16,0.42],
+  [0.50,0.16,0.34]
+];
+var KEY = "pk-helper-v1";
+
+var state = {
+  rounds: [],
+  settings: { centerPenalty: 0.16, mode: "read" },
+  nonce: 0
+};
+var temp = { my:null, myRes:"goal", opp:null, oppRes:"goal", keeperDive:null };
+
+/* ---------- 小工具 ---------- */
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function sum(a){ var t=0; for(var i=0;i<a.length;i++) t+=a[i]; return t; }
+function argmax(a){ var b=0; for(var i=1;i<a.length;i++) if(a[i]>a[b]) b=i; return b; }
+function norm(a){ var t=sum(a)||1; return a.map(function(v){ return v/t; }); }
+function weights(n,hl){ hl = hl||3; var w=[]; for(var i=0;i<n;i++) w.push(Math.pow(0.5,(n-1-i)/hl)); return w; }
+
+function recencyDist(seq, prior, alpha){
+  if(!seq.length) return prior.slice();
+  var w = weights(seq.length), c=[0,0,0], t=0, i;
+  for(i=0;i<seq.length;i++){ c[seq[i]] += w[i]; t += w[i]; }
+  return [0,1,2].map(function(j){ return (c[j] + alpha*prior[j])/(t+alpha); });
+}
+
+function transDist(seq){
+  var c=[[0,0,0],[0,0,0],[0,0,0]], w=weights(seq.length), i;
+  for(i=1;i<seq.length;i++) c[seq[i-1]][seq[i]] += w[i];
+  var strength = 1.2;
+  return c.map(function(row,f){
+    var t = sum(row);
+    return [0,1,2].map(function(to){ return (row[to] + strength*TRANS_PRIOR[f][to])/(t+strength); });
+  });
+}
+
+/* 序列预测：近期频率 + 一阶转移 + 先验，后期加“压力回惯用侧” */
+function predictNext(seq, prior){
+  if(!seq.length) return { p: prior.slice(), n:0 };
+  var base = recencyDist(seq, prior, 0.9);
+  var tr = transDist(seq)[seq[seq.length-1]];
+  var p = [0,1,2].map(function(i){ return 0.50*base[i] + 0.30*tr[i] + 0.20*prior[i]; });
+  var pressure = clamp((seq.length - 2)/4, 0, 1);
+  if(pressure > 0){
+    var own = argmax(base);
+    p = p.map(function(v,i){
+      if(i === own) return v*(1 + 0.12*pressure);
+      if(i === 1)   return v*(1 - 0.10*pressure);
+      return v;
+    });
+  }
+  return { p: norm(p), n: seq.length };
+}
+
+function execRates(rows){
+  var att=[0,0,0], goal=[0,0,0], PRIOR=[0.62,0.55,0.62], STR=2;
+  rows.forEach(function(r){ att[r.side]++; if(r.res === "goal") goal[r.side]++; });
+  return [0,1,2].map(function(i){ return (goal[i] + STR*PRIOR[i])/(att[i] + STR); });
+}
+
+/* ---------- 核心计算 ---------- */
+function compute(R){
+  var myShots = R.map(function(r){ return r.my; });
+  var oppShots = R.map(function(r){ return r.opp; });
+  var dives = R.filter(function(r){ return r.keeperDive !== null; }).map(function(r){ return r.keeperDive; });
+
+  var pKeeper = predictNext(dives, PRIOR_DIVE).p;       // 对方门将的扑救习惯
+  var pMy     = predictNext(myShots, PRIOR_SHOT).p;     // 对方对我下一脚的预判
+  var cover   = [0,1,2].map(function(i){ return 0.55*pKeeper[i] + 0.45*pMy[i]; });
+
+  var exec = execRates(R.map(function(r){ return { side:r.my, res:r.myRes }; }));
+  var cp = state.settings.centerPenalty;
+  var pGoal = [0,1,2].map(function(i){
+    return clamp(exec[i] * (1 - 0.5*cover[i]) - (i === 1 ? cp : 0), 0.05, 0.95);
+  });
+
+  var pOpp = predictNext(oppShots, PRIOR_SHOT).p;
+  var atk = argmax(pGoal);
+  var def = argmax(pOpp);
+
+  var notes = [];
+  var n = R.length;
+  if(n === 0){
+    notes.push("还没有记录：先用先验——门将扑左/右各约 38%、站中间约 24%；你踢左/右各 40%、中间 20%。");
+  }
+  if(dives.length >= 2){
+    var k = dives.length;
+    if(dives[k-1] === dives[k-2]){
+      notes.push("对方门将最近连扑 " + S[dives[k-1]] + S[dives[k-2]] + "。人对同一侧连扑三次的直觉抵触很强，模型在这里押他换边。");
+    } else {
+      notes.push("对方门将上一球扑了 " + S[dives[k-1]] + "，人换边后的惯性通常在这边延续一两球。");
+    }
+  }
+  if(myShots.length >= 2 && myShots[myShots.length-1] === myShots[myShots.length-2]){
+    notes.push("你自己连着两球都踢 " + S[myShots[myShots.length-1]] + "，对手会重点堵这侧——这就是我们避开它的直接原因。");
+  }
+  if(myShots.length >= 3){
+    var cnt=[0,0,0];
+    myShots.forEach(function(s){ cnt[s]++; });
+    var dom = argmax(cnt);
+    if(cnt[dom]/myShots.length >= 0.6){
+      notes.push("你 " + cnt[dom] + "/" + myShots.length + " 球都在 " + S[dom] + "。这不是秘密，门将也有眼睛。");
+    }
+  }
+  [0,1,2].forEach(function(i){
+    var a = R.filter(function(r){ return r.my === i; });
+    if(a.length >= 2){
+      var g = a.filter(function(r){ return r.myRes === "goal"; }).length;
+      if(g/a.length < 0.4) notes.push("你在 " + S[i] + " 侧 " + g + "/" + a.length + " 球没进，命中率已按历史打折。");
+    }
+  });
+  if(n >= 4) notes.push("已进入第 " + (n+1) + " 轮：压力越大，人越容易回到惯用侧——门将和你都一样，所以越到后面越该信‘他本来就会扑哪边’。");
+  var sorted = pGoal.slice().sort(function(a,b){ return b-a; });
+  if(sorted[0] - sorted[1] < 0.04) notes.push("三个方向的期望差距很小（<4 分），说明对手已经比较随机：这种情况读人收益很低，建议切「随缘」。");
+  if(cp > 0 && atk !== 1) notes.push("中路被扣了 " + (cp*100).toFixed(0) + " 分风险。你要是中路特别稳，可以在设置里把它调低。");
+  if(n > 0 && n < 4) notes.push("只有 " + n + " 球：现在的“规律”很可能只是巧合，当成参考，别当神谕。");
+  if(atk === 1) notes.push("中路是赌——门将扑出去才必进，他站中间不动就没了。落后需要稳的时候，宁可回左右。");
+
+  return {
+    atk: atk, pGoal: pGoal, cover: cover, exec: exec,
+    pKeeper: pKeeper, pMy: pMy, pOpp: pOpp, def: def,
+    notes: notes, dives: dives, myShots: myShots, oppShots: oppShots, n: n
+  };
+}
+
+function backtest(R){
+  var atk = { n:0, hit:0 }, def = { n:0, hit:0 };
+  for(var i=1;i<R.length;i++){
+    var a = compute(R.slice(0,i));
+    if(R[i].keeperDive !== null){
+      atk.n++;
+      if(a.atk !== R[i].keeperDive) atk.hit++;
+    }
+    def.n++;
+    if(a.def === R[i].opp) def.hit++;
+  }
+  return { atk: atk, def: def };
+}
+
+/* ---------- 渲染 ---------- */
+function el(id){ return document.getElementById(id); }
+
+function barsHTML(arr, best, keys){
+  return arr.map(function(v,i){
+    var pct = Math.round(v*100);
+    return '<div class="bar' + (i === best ? ' top' : '') + '">' +
+      '<span class="name">' + keys[i] + '</span>' +
+      '<span class="track"><span class="fill" style="width:' + pct + '%;background:' + C[i] + '"></span></span>' +
+      '<span class="val">' + pct + '%</span>' +
+    '</div>';
+  }).join("");
+}
+
+function renderAdvice(){
+  var a = compute(state.rounds);
+  el("atkRound").textContent = state.rounds.length ? "· 第 " + (state.rounds.length + 1) + " 球" : "";
+  el("atkBars").innerHTML = barsHTML(a.pGoal, a.atk, ["左","中","右"]);
+  el("defBars").innerHTML = barsHTML(a.pOpp, a.def, ["左","中","右"]);
+
+  if(state.settings.mode === "random" && state.rounds.length){
+    var pick = weightedPick([0.45,0.10,0.45], state.nonce);
+    el("atkSide").textContent = S[pick];
+    el("atkSide").style.color = C[pick];
+    el("atkPct").textContent = "掷出来的";
+    el("atkSec").textContent = "随缘模式：不给对手任何可读的规律。想重掷就点下面「再掷一次」。";
+  } else if(a.n === 0){
+    el("atkSide").textContent = "左 / 右";
+    el("atkSide").style.color = "#8b9ab5";
+    el("atkPct").textContent = Math.round(a.pGoal[0]*100) + "%";
+    el("atkSec").textContent = "第一球没东西可读：别踢正中间，左右各四成，随便挑一边。";
+  } else {
+    el("atkSide").textContent = S[a.atk];
+    el("atkSide").style.color = C[a.atk];
+    el("atkPct").textContent = Math.round(a.pGoal[a.atk]*100) + "%";
+    var second = argmax(a.pGoal.map(function(v,i){ return i === a.atk ? -1 : v; }));
+    var gap = Math.round((a.pGoal[a.atk] - a.pGoal[second])*100);
+    el("atkSec").textContent = (a.atk === 1 ? "中路是冷门答案，赌他没站中间。" : "次选 " + S[second] + "，低 " + gap + " 个百分点。");
+  }
+
+  el("defSide").textContent = S[a.def];
+  el("defSide").style.color = C[a.def];
+  el("defPct").textContent = Math.round(a.pOpp[a.def]*100) + "%";
+  el("defSec").textContent = a.n === 0 ? "对方还没踢过，先用先验。" : "他 " + a.oppShots.length + " 球里偏这个方向。";
+
+  el("notes").innerHTML = a.notes.map(function(t){ return "<li>" + t + "</li>"; }).join("");
+}
+
+function weightedPick(w, nonce){
+  var r = Math.random();
+  if(nonce){ // 重掷时换一个种子，避免同一帧重复
+    r = (r + nonce*0.137) % 1;
+  }
+  var acc = 0;
+  for(var i=0;i<w.length;i++){ acc += w[i]; if(r < acc) return i; }
+  return w.length-1;
+}
+
+function renderHist(){
+  var R = state.rounds;
+  el("count").textContent = R.length ? "共 " + R.length + " 球" : "空";
+  if(!R.length){
+    el("hist").innerHTML = '<div style="color:#5f6d86; font-size:12.5px">还没有记录。</div>';
+    return;
+  }
+  el("hist").innerHTML = R.map(function(r, i){
+    var rc = r.myRes === "goal" ? "g" : (r.myRes === "save" ? "s" : "m");
+    var rt = r.myRes === "goal" ? "进" : (r.myRes === "save" ? "被扑" : "打飞");
+    var orc = r.oppRes === "goal" ? "g" : (r.oppRes === "save" ? "s" : "m");
+    var ort = r.oppRes === "goal" ? "进" : (r.oppRes === "save" ? "被扑" : "打飞");
+    var kd = r.keeperDive === null ? '<span class="tag d">扑向?</span>' : '<span class="tag d">扑' + S[r.keeperDive] + '</span>';
+    return '<div class="hrow">' +
+      '<span class="idx">' + (i+1) + '</span>' +
+      '<span>我踢' + S[r.my] + ' <span class="tag ' + rc + '">' + rt + '</span></span>' +
+      '<span>他踢' + S[r.opp] + ' <span class="tag ' + orc + '">' + ort + '</span> ' + kd + '</span>' +
+      '<button class="x" data-del="' + i + '" title="删除">×</button>' +
+    '</div>';
+  }).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("[data-del]"), function(b){
+    b.addEventListener("click", function(){
+      state.rounds.splice(parseInt(b.getAttribute("data-del"), 10), 1);
+      save(); renderAll();
+    });
+  });
+}
+
+function renderStats(){
+  var R = state.rounds;
+  var myG = R.filter(function(r){ return r.myRes === "goal"; }).length;
+  var oppG = R.filter(function(r){ return r.oppRes === "goal"; }).length;
+  var bt = backtest(R);
+
+  el("stats").innerHTML =
+    '<div>我的点球<b>' + myG + "/" + R.length + '</b></div>' +
+    '<div>对方的点球<b>' + oppG + "/" + R.length + '</b></div>' +
+    '<div>我踢的方向<b>' + distLine(R.map(function(r){ return r.my; })) + '</b></div>' +
+    '<div>他踢的方向<b>' + distLine(R.map(function(r){ return r.opp; })) + '</b></div>';
+
+  var btTxt = "";
+  if(R.length < 6){
+    btTxt = R.length === 0 ? "还没有数据。每记一球，模型就多一条线索；记满 6 球这里会显示自检成绩。" : "样本只有 " + R.length + " 球，还看不出模型准不准。记满 6 球后，这里会显示留一法成绩（拿历史每一球回头考模型）。";
+  } else {
+    btTxt += "留一法自检（攻）：模型推荐的方向 " + bt.atk.hit + "/" + bt.atk.n + " 次没被门将扑到（" + Math.round(bt.atk.hit/bt.atk.n*100) + "%），瞎猜基线约 67%。";
+    if(bt.def.n > 0){
+      btTxt += "<br>留一法自检（守）：猜中对方射门方向 " + bt.def.hit + "/" + bt.def.n + "（" + Math.round(bt.def.hit/bt.def.n*100) + "%），基线 33%。";
+    }
+  }
+  el("backtest").innerHTML = btTxt;
+}
+
+function distLine(seq){
+  if(!seq.length) return "—";
+  var c=[0,0,0]; seq.forEach(function(s){ c[s]++; });
+  var bar = '<div class="split">' + [0,1,2].map(function(i){
+    var w = c[i]/seq.length*100;
+    return '<i style="width:' + w + '%;background:' + C[i] + '"></i>';
+  }).join("") + '</div>';
+  return c.map(function(v,i){ return S[i] + v; }).join(" ") + bar;
+}
+
+/* ---------- 输入区 ---------- */
+function buildSegs(){
+  var segMy = el("segMy"), segOpp = el("segOpp");
+  segMy.innerHTML = ""; segOpp.innerHTML = "";
+  S.forEach(function(name, i){
+    var b = document.createElement("button");
+    b.textContent = name; b.type = "button";
+    b.addEventListener("click", function(){ temp.my = i; paintSegs(); });
+    segMy.appendChild(b);
+
+    var b2 = document.createElement("button");
+    b2.textContent = name; b2.type = "button";
+    b2.addEventListener("click", function(){ temp.opp = i; paintSegs(); });
+    segOpp.appendChild(b2);
+  });
+
+  var resDefs = [["goal","进"],["save","被扑"],["miss","打飞"]];
+  [["segMyRes","myRes"],["segOppRes","oppRes"]].forEach(function(pair){
+    var host = el(pair[0]);
+    host.innerHTML = "";
+    resDefs.forEach(function(d){
+      var b = document.createElement("button");
+      b.textContent = d[1]; b.type = "button"; b.dataset.v = d[0];
+      b.addEventListener("click", function(){ temp[pair[1]] = d[0]; paintSegs(); });
+      host.appendChild(b);
+    });
+  });
+
+  var keep = el("segKeep");
+  keep.innerHTML = "";
+  [["左",0],["中",1],["右",2],["没注意",null]].forEach(function(d){
+    var b = document.createElement("button");
+    b.textContent = d[0]; b.type = "button";
+    b.addEventListener("click", function(){ temp.keeperDive = d[1]; paintSegs(); });
+    keep.appendChild(b);
+  });
+}
+
+function paintSegs(){
+  var m = el("segMy").children, o = el("segOpp").children;
+  for(var i=0;i<3;i++){
+    m[i].className = temp.my === i ? "on" : "";
+    o[i].className = temp.opp === i ? "on" : "";
+  }
+  [["segMyRes","myRes"],["segOppRes","oppRes"]].forEach(function(pair){
+    var kids = el(pair[0]).children;
+    for(var j=0;j<kids.length;j++){
+      var isOn = temp[pair[1]] === kids[j].dataset.v;
+      kids[j].className = isOn ? ("on " + kids[j].dataset.v) : "";
+    }
+  });
+  var k = el("segKeep").children;
+  for(var q=0;q<k.length;q++){
+    var val = [0,1,2,null][q];
+    k[q].className = (temp.keeperDive === val && (val !== null || q === 3)) ? "on" : "";
+  }
+  el("commit").disabled = !(temp.my !== null && temp.opp !== null);
+}
+
+/* ---------- 存取 ---------- */
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({ rounds: state.rounds, settings: state.settings })); }catch(e){}
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    var o = JSON.parse(raw);
+    if(o && Array.isArray(o.rounds)) state.rounds = o.rounds;
+    if(o && o.settings) state.settings = Object.assign({}, state.settings, o.settings);
+  }catch(e){}
+}
+
+/* ---------- 备份弹窗 ---------- */
+var modalMode = "export";
+function showModal(title, text, mode){
+  modalMode = mode;
+  el("modalTitle").textContent = title;
+  el("modalText").value = text;
+  el("modalText").readOnly = (mode === "export");
+  el("modalCopy").style.display = (mode === "export") ? "" : "none";
+  el("modalOk").textContent = (mode === "export") ? "完成" : "导入";
+  el("modal").hidden = false;
+}
+function closeModal(){ el("modal").hidden = true; }
+
+/* ---------- 主流程 ---------- */
+function renderAll(){
+  renderAdvice(); renderHist(); renderStats(); paintSegs();
+  el("cp").value = Math.round(state.settings.centerPenalty*100);
+  el("cpv").textContent = Math.round(state.settings.centerPenalty*100) + "%";
+  Array.prototype.forEach.call(el("modeSeg").children, function(b){
+    b.className = b.dataset.mode === state.settings.mode ? "on" : "";
+  });
+}
+
+function init(){
+  load();
+  buildSegs();
+  if(location.search.indexOf("demo=1") >= 0) state.rounds = DEMO.slice();
+
+  el("commit").addEventListener("click", function(){
+    if(temp.my === null || temp.opp === null) return;
+    state.rounds.push({ my:temp.my, myRes:temp.myRes, opp:temp.opp, oppRes:temp.oppRes, keeperDive:temp.keeperDive });
+    temp.my = null; temp.opp = null; temp.keeperDive = null;
+    save(); renderAll();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  });
+
+  el("undo").addEventListener("click", function(){
+    if(state.rounds.length){ state.rounds.pop(); save(); renderAll(); }
+  });
+  el("clear").addEventListener("click", function(){
+    if(!state.rounds.length) return;
+    if(confirm("清空全部 " + state.rounds.length + " 球记录？")){ state.rounds = []; save(); renderAll(); }
+  });
+  el("demo").addEventListener("click", function(){
+    state.rounds = DEMO.slice();
+    save(); renderAll();
+  });
+  el("cp").addEventListener("input", function(){
+    state.settings.centerPenalty = parseInt(this.value,10)/100;
+    save(); renderAll();
+  });
+  el("modeSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if(!b) return;
+    state.settings.mode = b.dataset.mode;
+    save(); renderAll();
+  });
+  el("reroll").addEventListener("click", function(){
+    state.nonce++;
+    renderAdvice();
+  });
+
+  el("exportBtn").addEventListener("click", function(){
+    var data = JSON.stringify({ v:1, rounds: state.rounds, settings: state.settings });
+    showModal("备份：复制这串，存备忘录或发给自己", data, "export");
+  });
+  el("importBtn").addEventListener("click", function(){
+    showModal("恢复：把备份粘进来，再点「导入」", "", "import");
+  });
+  el("modalClose").addEventListener("click", closeModal);
+  el("modal").addEventListener("click", function(e){ if(e.target === el("modal")) closeModal(); });
+  el("modalCopy").addEventListener("click", function(){
+    var t = el("modalText");
+    t.focus(); t.select(); t.setSelectionRange(0, t.value.length);
+    var done = false;
+    try{ done = document.execCommand("copy"); }catch(e){}
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(t.value).then(function(){}, function(){});
+      done = true;
+    }
+    el("modalCopy").textContent = done ? "已复制" : "长按选中";
+    setTimeout(function(){ el("modalCopy").textContent = "复制"; }, 1500);
+  });
+  el("modalOk").addEventListener("click", function(){
+    if(modalMode !== "import"){ closeModal(); return; }
+    try{
+      var o = JSON.parse(el("modalText").value.trim());
+      if(!o || !Array.isArray(o.rounds)) throw new Error("格式不对");
+      state.rounds = o.rounds.filter(function(r){
+        return typeof r.my === "number" && typeof r.opp === "number";
+      });
+      if(o.settings) state.settings = Object.assign({}, state.settings, o.settings);
+      save(); renderAll(); closeModal();
+    }catch(err){
+      el("modalTitle").textContent = "导入失败：" + err.message + "（检查是不是复制全了）";
+    }
+  });
+
+  renderAll();
+}
+
+var DEMO = [
+  { my:0, myRes:"goal", opp:2, oppRes:"goal", keeperDive:2 },
+  { my:2, myRes:"save", opp:0, oppRes:"save", keeperDive:2 },
+  { my:2, myRes:"goal", opp:0, oppRes:"goal", keeperDive:1 },
+  { my:1, myRes:"goal", opp:1, oppRes:"goal", keeperDive:0 },
+  { my:0, myRes:"save", opp:2, oppRes:"goal", keeperDive:0 }
+];
+
+document.addEventListener("DOMContentLoaded", init);
+
+/* 注册离线缓存：装到主屏幕后，电脑关机也能用 */
+if("serviceWorker" in navigator){
+  var secureCtx = location.protocol === "https:" ||
+                  location.hostname === "localhost" ||
+                  location.hostname === "127.0.0.1";
+  if(secureCtx){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+}
+if(document.readyState !== "loading"){ /* 极端情况下直接跑 */ }
+})();
+</script>
+</body>
+</html>
