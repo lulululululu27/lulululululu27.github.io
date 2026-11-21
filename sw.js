@@ -1,6 +1,6 @@
 ﻿/* 点球读人辅助器 · 离线缓存
    装到主屏幕后，即使电脑关了、断网了，也能打开。 */
-const CACHE = "pk-helper-v2";
+const CACHE = "pk-helper-v3";
 const ASSETS = [
   "./",
   "./index.html",
