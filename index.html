@@ -212,7 +212,7 @@
     <div class="seg small" id="segKeep"></div>
   </div>
   <button id="commit" disabled>记下这一球</button>
-  <div class="warn">「门将扑向」能选就选——它比你的进球结果信息量大得多。没看清选「没注意」。</div>
+  <div class="warn">「门将扑向」能选就选——它比你的进球结果信息量大得多。没看清选「没注意」。<br>左右一律按画面填：你俩看的是同一画面，不用管谁站哪边。</div>
 </section>
 
 <!-- 历史 -->
@@ -454,7 +454,7 @@ function compute(R){
   var pKeeper = predictNext(dives, PRIOR_DIVE).p;       // 对方门将的扑救习惯
   var pMy     = predictNext(myShots, PRIOR_SHOT).p;     // 对方对我下一脚的预判
 
-  // 比分偏置：落后的门将更爱扑向自己的右手边（= 你画面里的左边）
+  // 比分偏置：比分领先时，门将更常扑向画面左侧（研究里写的是门将右手边，这里已统一成画面方向）
   var myG = 0, oppG = 0;
   R.forEach(function(r){ if(r.myRes === "goal") myG++; if(r.oppRes === "goal") oppG++; });
   var behindBias = (R.length >= 3 && myG > oppG);
@@ -512,7 +512,7 @@ function compute(R){
   if(cp > 0 && atk !== 1) notes.push("中路被扣了 " + (cp*100).toFixed(0) + " 分风险。你要是中路特别稳，可以在设置里把它调低。");
   if(n > 0 && n < 4) notes.push("只有 " + n + " 球：现在的“规律”很可能只是巧合，当成参考，别当神谕。");
   if(atk === 1) notes.push("中路是赌——门将扑出去才必进，他站中间不动就没了。落后需要稳的时候，宁可回左右。");
-  if(behindBias) notes.push("比分你领先（" + myG + ":" + oppG + "）：落后的门将更爱往自己的右手边倒（也就是你画面里的左边，约七成）——这球右边更空。");
+  if(behindBias) notes.push("比分你领先（" + myG + ":" + oppG + "）：落后的一方，门将更常扑向画面左侧（约七成）——这球打右边更空。");
   notes.push("博弈上更稳的做法：按均衡配比随机出脚（左 " + Math.round(eq.p[0]*100) + "%、中 " + Math.round(eq.p[1]*100) + "%、右 " + Math.round(eq.p[2]*100) + "%），对手怎么猜都占不到便宜。");
 
   return {
@@ -657,7 +657,7 @@ function renderTells(a){
     var lb = Math.round(t.leftBehind/t.behindN*100);
     rows.push('<div class="tell"><b>落后时 ' + lb + '% 扑在你左边</b><span class="tagx">' + t.leftBehind + '/' + t.behindN + '</span><br>' +
       (lb >= 60
-        ? "和你领先时的规律一致：他一落后就往自己右手边倒，那就踢右边。"
+        ? "和你领先时的规律一致：他一落后就更爱扑画面左侧，那就打右边。"
         : "样本里没看出明显的“落后偏侧”，按均衡走就行。") + '</div>');
   }
 

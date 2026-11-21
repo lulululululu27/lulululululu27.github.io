@@ -1,4 +1,4 @@
-> **线上地址：<https://lulululululu27.github.io/>** —— 已部署为 PWA，手机打开一次后「添加到主屏幕」，断网 / 关电脑都能用。
+﻿> **线上地址：<https://lulululululu27.github.io/>** —— 已部署为 PWA，手机打开一次后「添加到主屏幕」，断网 / 关电脑都能用。
 > 以下内容为本地使用与原理说明；线上版由 `网站部署` 文件夹发布。
 # 点球读人辅助器
 
@@ -90,7 +90,7 @@ Safari 不支持直接打开本地 html（点了只看得到源码）。要么�
 4. 顶部两张卡片就是答案：攻（我踢哪边）、守（我扑哪边）。
 5. 记录只存在你本机浏览器里，刷新不丢，也不上传。
 
-**方向约定：以画面为准。** 你俩看的是同一块屏幕，画面左边就是「左」，不用换算、不用管谁站哪边，谁按都不出错。
+**方向约定：全按画面。** 你俩看的是同一块屏幕，画面左边就是「左」——不区分谁站哪边，也不用换视角，记录时按你看到的方向填就行。
 
 ---
 
@@ -105,7 +105,7 @@ Safari 不支持直接打开本地 html（点了只看得到源码）。要么�
                  + 0.45 × 他对你的预判(side)        ← 他根据你的历史猜你踢哪
 ```
 
-`他对你的预判`用的模型和 `他的习惯`是同一个——同一套函数喂你的历史射门序列，就等于在算「他会怎么猜你」。这叫**反读**（二阶推理）：你俩互相建模，谁的模式更明显谁就吃亏。这跟「左右视角」无关——你们看的是同一块屏幕，不存在谁左谁右的换算。
+`他对你的预判`用的模型和 `他的习惯`是同一个——同一套函数喂你的历史射门序列，就等于在算「他会怎么猜你」。这叫**反读**（二阶推理）：你俩互相建模，谁的模式更明显谁就吃亏。这是行为预测，跟左右视角无关——你们看的是同一块画面。
 
 然后：
 
@@ -208,7 +208,7 @@ P(下一侧) = 0.50 × 近期加权频率   ← 近 3 球权重最高，越早�
 |---|---|---|
 | **连扑回避** | 他连续两次扑同一边的比例（随机基准 33%） | 明显低于 33% 时（赌徒谬误），他刚扑过的那边反而空着 → 踢那边 |
 | **跟着你上一球** | 他扑的方向 = 你上一球方向的比例（基准 33%） | 明显高于 33% 时，反向踢 |
-| **落后时偏哪侧** | 你领先时的扑救方向分布 | 研究显示落后门将更爱扑向自己的右手边（你画面里的左边，约七成）→ 踢右边 |
+| **落后时偏哪侧** | 你领先时的扑救方向分布 | 研究显示落后时门将更常扑画面左侧（约七成）→ 打右边 |
 
 这三条都带样本数（`2/4` 这种），样本不足时只会显示「牌面还不够」，不硬编故事。
 
@@ -217,7 +217,7 @@ P(下一侧) = 0.50 × 近期加权频率   ← 近 3 球权重最高，越早�
 - **混合策略均衡**：Chiappori, Levitt & Groseclose (2002), *Testing Mixed-Strategy Equilibria When Players Are Heterogeneous: The Case of Penalty Kicks in Soccer*, American Economic Review——职业球员的点球选择确实接近混合策略均衡，且中路被系统性低估。
 - **中路被低估**：Bar-Eli et al. (2007), *Action bias among elite soccer goalkeepers*, Journal of Economic Psychology——门将 94% 会扑向一侧，只有约 6% 站中间；而中路射门成功率反而更高（[NYT 报道](http://www.nytimes.com/2008/12/14/magazine/14Ideas-Section2-B-t-008.html)）。
 - **赌徒谬误**：Wood et al. (2014), *Asymmetric predictability and cognitive competition in football penalty shootouts*, Current Biology——门将会因为「刚才扑过这边」而倾向换边，但**射手并不会利用**（[UCL 新闻稿](https://archive.eurekalert.org/pub_releases/2014-07/ucl-gpt072814.php)）。这条是这个工具最实在的边际收益。
-- **落后时偏右侧**：Roskes et al.（阿姆斯特丹大学）——球队落后时门将扑向自己右手边 71%，领先时只有 48%（[Irish Times 综述](https://www.irishtimes.com/opinion/2026/07/13/ian-robertson-a-neuropsychologists-advice-on-how-to-win-a-world-cup-penalty-shoot-out/)）。机制是「趋近动机」激活左前额，动作偏向身体右侧。
+- **落后时偏右侧**：Roskes et al.（阿姆斯特丹大学）——球队落后时门将扑向自己右手边 71%，领先时只有 48%（换算到你们的共享画面即「左侧」）（[Irish Times 综述](https://www.irishtimes.com/opinion/2026/07/13/ian-robertson-a-neuropsychologists-advice-on-how-to-win-a-world-cup-penalty-shoot-out/)）。机制是「趋近动机」激活左前额，动作偏向身体右侧。
 - **中路宽度**：*Goal center width, how to count sequences, and the gambler's fallacy in soccer penalty shootouts*, Judgment and Decision Making——用序列计数方式的不同会改变结论，提醒别过度解读「连开三次」。
 
 ## 六、局限
